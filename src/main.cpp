@@ -68,20 +68,18 @@ struct Master_Timer
                                                       // the physics sees
 };
 
-#if 0
 void set_dpi()
 {
-    real32 dpi = SDL_GetWindowPixelDensity(global_window);
-    if (SDL_GetWindowPixelDensity(0, &dpi, NULL, NULL) == 0) {
-        // Successfully retrieved DPI
-    } else {
-        // Handle error
-    }
+    int32 window_width, window_height;
+    SDL_GetWindowSize(global_window, &window_width, &window_height);
 
-    real32 base_DPI = 72.0f;
-    global_text_dpi_scale_factor = dpi / base_DPI;
+    int32 pixel_width, pixel_height;
+    SDL_GetWindowSizeInPixels(global_window, &pixel_width, &pixel_height);
+
+    real32 dpi = (real32)pixel_width / (real32)window_width;
+
+    global_text_dpi_scale_factor = dpi;
 }
-#endif
 
 #ifdef __WIN32__
 uint64 global_last_cycle_count;
@@ -116,23 +114,17 @@ Scene global_gameplay_scene;
 #include "scenes/start_screen.cpp"
 #include "scenes/gameplay.cpp"
 // clang-format on
-#if 0
+
+#if 1
 int32 filterEvent(void* userdata, SDL_Event* event)
 {
     Input* input = (Input*)(userdata);
 
-    if (event->type == SDL_WINDOWEVENT)
+    if (event->type == SDL_EVENT_WINDOW_RESIZED)
     {
-        if (event->window.event == SDL_WINDOWEVENT_RESIZED)
-        {
-            SDL_GetWindowSize(global_window, &window_width, &window_height);
-        }
-
-        if (event->window.event == SDL_WINDOWEVENT_RESIZED || event->window.event == SDL_WINDOWEVENT_EXPOSED)
-        {
-            // main_work(input);
-        }
+        SDL_GetWindowSize(global_window, &window_width, &window_height);
     }
+
     return 1;  // Allow other events
 }
 #endif
@@ -149,15 +141,26 @@ int32 main(int32 argc, char* argv[])
         return SDL_APP_FAILURE;
     }
 
-    if (!SDL_CreateWindowAndRenderer("SDL Snake Game",
-                                     LOGICAL_WIDTH,
-                                     LOGICAL_HEIGHT,
-                                     0,
-                                     &global_window,
-                                     &global_renderer))
-    {
-        std::cerr << "SDL_CreateWindowAndRenderer Error: " << SDL_GetError() << std::endl;
-        return SDL_APP_FAILURE;
+    {  // Window and Renderer
+
+        if (!SDL_CreateWindowAndRenderer("SDL Snake Game",
+                                         LOGICAL_WIDTH,
+                                         LOGICAL_HEIGHT,
+                                         SDL_WINDOW_RESIZABLE | SDL_WINDOW_HIGH_PIXEL_DENSITY,
+                                         &global_window,
+                                         &global_renderer))
+        {
+            std::cerr << "SDL_CreateWindowAndRenderer Error: " << SDL_GetError() << std::endl;
+            return SDL_APP_FAILURE;
+        }
+
+        // Fixed aspect ratio
+        SDL_SetRenderLogicalPresentation(global_renderer,
+                                         LOGICAL_WIDTH,
+                                         LOGICAL_HEIGHT,
+                                         SDL_LOGICAL_PRESENTATION_LETTERBOX);
+
+        SDL_SetRenderVSync(global_renderer, VSYNC_ENABLED);
     }
 
     if (!TTF_Init())
@@ -185,13 +188,6 @@ int32 main(int32 argc, char* argv[])
 
 #endif
 
-    // SDL_SetRenderLogicalPresentation(global_renderer, LOGICAL_WIDTH, LOGICAL_HEIGHT, SDL_LOGICAL_PRESENTATION_STRETCH);
-
-    // Set linear scaling for smoother scaling
-    // SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "1");
-
-    SDL_SetRenderVSync(global_renderer, VSYNC_ENABLED);
-
     // const char* platform = SDL_GetPlatform();
     // std::cout << "Platform " << platform << std::endl;
 
@@ -201,14 +197,11 @@ int32 main(int32 argc, char* argv[])
 
 // Set macOS-specific hint
 #ifdef __APPLE__
-    // SDL_SetHint(SDL_HINT_VIDEO_MAC_FULLSCREEN_SPACES, "1");
+    SDL_SetHint(SDL_HINT_VIDEO_MAC_FULLSCREEN_SPACES, "1");
     // SDL_SetHint(SDL_HINT_RENDER_DRIVER, "metal");
-    // SDL_SetHint(SDL_HINT_VIDEO_HIGHDPI_DISABLED, "1");
 #endif
 
-#if 0
     set_dpi();
-#endif
 
     SDL_Event event;
     Input input = {};
@@ -759,10 +752,8 @@ int32 main(int32 argc, char* argv[])
 //==============================
     } // end while (global_running)
 
-#if 0
     cleanup_fonts();
     TTF_Quit();
-#endif
     SDL_DestroyRenderer(global_renderer);
     SDL_DestroyWindow(global_window);
     SDL_Quit();

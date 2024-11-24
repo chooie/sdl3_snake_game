@@ -90,7 +90,17 @@ void handle_events(SDL_Event* event, Input* input)
                         case SDL_SCANCODE_F:
                         {
                             SDL_WindowFlags flags = SDL_GetWindowFlags(global_window);
-                            SDL_SetWindowFullscreen(global_window, !(flags & SDL_WINDOW_FULLSCREEN));
+                            bool32 is_fullscreen = flags & SDL_WINDOW_FULLSCREEN;
+                            if (is_fullscreen)
+                            {
+                                SDL_ShowCursor();
+                            }
+                            else
+                            {
+                                SDL_HideCursor();
+                            }
+
+                            SDL_SetWindowFullscreen(global_window, !is_fullscreen);
                         } break;
                     }
                 }
