@@ -23,7 +23,6 @@ g++ -g -Wno-switch \
 install_name_tool -add_rpath @executable_path/../vendor/SDL3/macos/lib build/sdl_snake_game
 
 # SDL3_ttf
-# SDL3_ttf
 install_name_tool -add_rpath @executable_path/../vendor/SDL3_ttf/macos/lib build/sdl_snake_game
 # Correct library reference to match actual file
 install_name_tool -change @rpath/libSDL3_ttf.0.dylib @rpath/libSDL3_ttf.0.0.0.dylib build/sdl_snake_game
