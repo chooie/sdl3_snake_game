@@ -63,7 +63,8 @@
     "xmemory": "cpp",
     "xstring": "cpp",
     "xtr1common": "cpp",
-    "xutility": "cpp"
+    "xutility": "cpp",
+    "__node_handle": "cpp"
   },
   "todohighlight.defaultStyle": {
     "color": "red",

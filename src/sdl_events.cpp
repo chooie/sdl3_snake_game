@@ -29,13 +29,13 @@ struct Input
 
 #define is_down(b) input->buttons[b].is_down
 #define pressed(b) input->buttons[b].is_down && input->buttons[b].changed
-#define pressed_local(b) input.buttons[b].is_down && input.buttons[b].changed
+#define pressed_local(b) input.buttons[b].is_down&& input.buttons[b].changed
 #define released(b) (!input->buttons[b].is_down && input->buttons[b].changed)
 
 #define process_input(button, sdl_key)                                            \
     case sdl_key:                                                                 \
     {                                                                             \
-        if (event->type == SDL_KEYDOWN)                                           \
+        if (event->type == SDL_EVENT_KEY_DOWN)                                    \
         {                                                                         \
             input->buttons[button].changed = input->buttons[button].is_down == 0; \
             input->buttons[button].is_down = 1;                                   \
@@ -59,89 +59,48 @@ void handle_events(SDL_Event* event, Input* input)
     {
         switch (event->type)
         {
-            case SDL_KEYDOWN:
-            case SDL_KEYUP:
+            case SDL_EVENT_KEY_DOWN:
+            case SDL_EVENT_KEY_UP:
             {
-                switch (event->key.keysym.sym)
+                switch (event->key.scancode)
                 {
-                    process_input(BUTTON_W, SDLK_w);
-                    process_input(BUTTON_A, SDLK_a);
-                    process_input(BUTTON_S, SDLK_s);
-                    process_input(BUTTON_D, SDLK_d);
-                    process_input(BUTTON_UP, SDLK_UP);
-                    process_input(BUTTON_LEFT, SDLK_LEFT);
-                    process_input(BUTTON_DOWN, SDLK_DOWN);
-                    process_input(BUTTON_RIGHT, SDLK_RIGHT);
-                    process_input(BUTTON_SPACE, SDLK_SPACE);
-                    process_input(BUTTON_ENTER, SDLK_RETURN);
-                    process_input(BUTTON_ESCAPE, SDLK_ESCAPE);
+                    process_input(BUTTON_W, SDL_SCANCODE_W);
+                    process_input(BUTTON_A, SDL_SCANCODE_A);
+                    process_input(BUTTON_S, SDL_SCANCODE_S);
+                    process_input(BUTTON_D, SDL_SCANCODE_D);
+                    process_input(BUTTON_UP, SDL_SCANCODE_UP);
+                    process_input(BUTTON_LEFT, SDL_SCANCODE_LEFT);
+                    process_input(BUTTON_DOWN, SDL_SCANCODE_DOWN);
+                    process_input(BUTTON_RIGHT, SDL_SCANCODE_RIGHT);
+                    process_input(BUTTON_SPACE, SDL_SCANCODE_SPACE);
+                    process_input(BUTTON_ENTER, SDL_SCANCODE_RETURN);
+                    process_input(BUTTON_ESCAPE, SDL_SCANCODE_ESCAPE);
                 }
-            }
-            break;
-        }
 
-        switch (event->type)
-        {
-            case SDL_KEYUP:
-            {
-                switch (event->key.keysym.sym)
+                if (event->type == SDL_EVENT_KEY_UP)
                 {
-                    case SDLK_BACKQUOTE:
+                    switch (event->key.scancode)
                     {
-                        global_display_debug_info = !global_display_debug_info;
-                    } break;
-                    case SDLK_f:
-                    {
-                        int isFullScreen = SDL_GetWindowFlags(global_window) & SDL_WINDOW_FULLSCREEN_DESKTOP;
-                        if (isFullScreen)
+                        case SDL_SCANCODE_GRAVE:  // Backquote key
                         {
-                            SDL_SetWindowFullscreen(global_window, 0);
-                            SDL_ShowCursor(SDL_ENABLE);
-                            SDL_SetRelativeMouseMode(SDL_FALSE);
+                            global_display_debug_info = !global_display_debug_info;
                         }
-                        else
+                        break;
+
+                        case SDL_SCANCODE_F:
                         {
-                            // Get the desktop display mode for the main monitor (usually display index 0)
-                            SDL_DisplayMode desktop_mode;
-                            if (SDL_GetDesktopDisplayMode(0, &desktop_mode) != 0)
-                            {
-                                SDL_Log("Failed to get desktop display mode: %s", SDL_GetError());
-                                return;
-                            }
-
-                            // Set the display mode to match the desktop (native) resolution and refresh rate
-                            if (SDL_SetWindowDisplayMode(global_window, &desktop_mode) != 0)
-                            {
-                                SDL_Log("Failed to set window display mode: %s", SDL_GetError());
-                            }
-                            SDL_SetWindowFullscreen(global_window, SDL_WINDOW_FULLSCREEN_DESKTOP);
-                            SDL_ShowCursor(SDL_DISABLE);
-                            SDL_SetRelativeMouseMode(SDL_TRUE);
-                        }
+                            SDL_WindowFlags flags = SDL_GetWindowFlags(global_window);
+                            SDL_SetWindowFullscreen(global_window, !(flags & SDL_WINDOW_FULLSCREEN));
+                        } break;
                     }
-                    break;
                 }
-            }
-            break;
+            } break;
 
-            case SDL_WINDOWEVENT:
-            {
-                switch (event->window.event)
-                {
-                    case SDL_WINDOWEVENT_CLOSE:
-                    {
-                        global_running = 0;
-                    }
-                    break;
-                }
-            }
-            break;
-
-            case SDL_QUIT:
+            case SDL_EVENT_WINDOW_CLOSE_REQUESTED:
+            case SDL_EVENT_QUIT:
             {
                 global_running = 0;
-            }
-            break;
+            } break;
         }
     }
 }

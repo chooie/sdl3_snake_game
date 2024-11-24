@@ -71,8 +71,8 @@ struct Master_Timer
 #if 0
 void set_dpi()
 {
-    real32 dpi;
-    if (SDL_GetDisplayDPI(0, &dpi, NULL, NULL) == 0) {
+    real32 dpi = SDL_GetWindowPixelDensity(global_window);
+    if (SDL_GetWindowPixelDensity(0, &dpi, NULL, NULL) == 0) {
         // Successfully retrieved DPI
     } else {
         // Handle error
@@ -94,7 +94,6 @@ uint64 global_total_cycles_elapsed;
 
 // clang-format off
 #include "sdl_events.cpp"
-// #include "game.cpp"
 // #include "render.cpp"
 // #include "audio.cpp"
 
@@ -438,7 +437,7 @@ int32 main(int32 argc, char* argv[])
         }
 
         {  // Input and event handling
-            handle_input(&event, &input);
+            handle_events(&event, &input);
 #if 0
             global_current_scene->handle_input(global_current_scene, &input);
 #endif
