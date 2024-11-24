@@ -1,5 +1,5 @@
 #include <SDL3/SDL.h>
-// #include <SDL2/SDL_ttf.h>
+#include <SDL3_ttf/SDL_ttf.h>
 
 struct Color_RGBA
 {
@@ -9,7 +9,7 @@ struct Color_RGBA
     uint8 alpha;
 };
 
-void draw_rect(SDL_Rect rect, SDL_Color color)
+void draw_rect(SDL_FRect rect, SDL_Color color)
 {
     SDL_SetRenderDrawColor(global_renderer, color.r, color.g, color.b, color.a);
     SDL_RenderFillRect(global_renderer, &rect);
@@ -42,7 +42,7 @@ TTF_Font* get_font(int32 pt_size)
     TTF_Font* font = TTF_OpenFont("fonts/Share_Tech_Mono/ShareTechMono-Regular.ttf", pt_size);
     if (!font)
     {
-        fprintf(stderr, "Failed to load font: %s\n", TTF_GetError());
+        fprintf(stderr, "Failed to load font: %s\n", SDL_GetError());
         return NULL;
     }
 
@@ -77,7 +77,7 @@ struct Drawn_Text
     real32 original_value;
     real32 font_size;
     SDL_Color color;
-    SDL_Rect text_rect;
+    SDL_FRect text_rect;
     SDL_Texture* cached_texture;
 };
 
@@ -87,7 +87,7 @@ struct Drawn_Text_Int32
     int32 original_value;
     real32 font_size;
     SDL_Color color;
-    SDL_Rect text_rect;
+    SDL_FRect text_rect;
     SDL_Texture* cached_texture;
 };
 
@@ -101,7 +101,7 @@ struct Drawn_Text_Static
     const char* text_string;
     real32 font_size;
     SDL_Color color;
-    SDL_Rect text_rect;
+    SDL_FRect text_rect;
     SDL_Texture* cached_texture;
 };
 
@@ -112,19 +112,19 @@ void draw_text_static(Drawn_Text_Static* drawn_text)
         SDL_assert(drawn_text->font_size > 0);
         int32 pt_size = get_font_pt_size(drawn_text->font_size);
         TTF_Font* font = get_font(pt_size);
-        SDL_Surface* surface = TTF_RenderText_Blended(font, drawn_text->text_string, drawn_text->color);
+        SDL_Surface* surface = TTF_RenderText_Blended(font, drawn_text->text_string, strlen(drawn_text->text_string), drawn_text->color);
         drawn_text->cached_texture = SDL_CreateTextureFromSurface(global_renderer, surface);
         // Pass-through the color's alpha channel to control opacity
         SDL_SetTextureAlphaMod(drawn_text->cached_texture, drawn_text->color.a);
-        SDL_FreeSurface(surface);
+        SDL_DestroySurface(surface);
 
-        SDL_QueryTexture(drawn_text->cached_texture, NULL, NULL, &drawn_text->text_rect.w, &drawn_text->text_rect.h);
+        SDL_GetTextureSize(drawn_text->cached_texture, &drawn_text->text_rect.w, &drawn_text->text_rect.h);
 
         drawn_text->text_rect.w /= global_text_dpi_scale_factor;
         drawn_text->text_rect.h /= global_text_dpi_scale_factor;
     }
 
-    SDL_RenderCopy(global_renderer, drawn_text->cached_texture, NULL, &drawn_text->text_rect);
+    SDL_RenderTexture(global_renderer, drawn_text->cached_texture, NULL, &drawn_text->text_rect);
 }
 
 struct Drawn_Text_Static_2
@@ -132,7 +132,7 @@ struct Drawn_Text_Static_2
     const char* text_string;
     real32 font_size;
     SDL_Color color;
-    SDL_Rect text_rect;
+    SDL_FRect text_rect;
     SDL_Texture* cached_texture;
     bool32 should_update;
 };
@@ -153,19 +153,19 @@ void draw_text_static_2(Drawn_Text_Static_2* drawn_text)
         SDL_assert(drawn_text->font_size > 0);
         int32 pt_size = get_font_pt_size(drawn_text->font_size);
         TTF_Font* font = get_font(pt_size);
-        SDL_Surface* surface = TTF_RenderText_Blended(font, drawn_text->text_string, drawn_text->color);
+        SDL_Surface* surface = TTF_RenderText_Blended(font, drawn_text->text_string, strlen(drawn_text->text_string), drawn_text->color);
         drawn_text->cached_texture = SDL_CreateTextureFromSurface(global_renderer, surface);
         // Pass-through the color's alpha channel to control opacity
         SDL_SetTextureAlphaMod(drawn_text->cached_texture, drawn_text->color.a);
-        SDL_FreeSurface(surface);
+        SDL_DestroySurface(surface);
 
-        SDL_QueryTexture(drawn_text->cached_texture, NULL, NULL, &drawn_text->text_rect.w, &drawn_text->text_rect.h);
+        SDL_GetTextureSize(drawn_text->cached_texture, &drawn_text->text_rect.w, &drawn_text->text_rect.h);
 
         drawn_text->text_rect.w /= global_text_dpi_scale_factor;
         drawn_text->text_rect.h /= global_text_dpi_scale_factor;
     }
 
-    SDL_RenderCopy(global_renderer, drawn_text->cached_texture, NULL, &drawn_text->text_rect);
+    SDL_RenderTexture(global_renderer, drawn_text->cached_texture, NULL, &drawn_text->text_rect);
 }
 
 void draw_text_real32(Drawn_Text* drawn_text, real32 current_value)
@@ -184,19 +184,19 @@ void draw_text_real32(Drawn_Text* drawn_text, real32 current_value)
         SDL_assert(drawn_text->font_size > 0);
         int32 pt_size = get_font_pt_size(drawn_text->font_size);
         TTF_Font* font = get_font(pt_size);
-        SDL_Surface* surface = TTF_RenderText_Blended(font, drawn_text->text_string, drawn_text->color);
+        SDL_Surface* surface = TTF_RenderText_Blended(font, drawn_text->text_string, strlen(drawn_text->text_string), drawn_text->color);
         drawn_text->cached_texture = SDL_CreateTextureFromSurface(global_renderer, surface);
         // Pass-through the color's alpha channel to control opacity
         SDL_SetTextureAlphaMod(drawn_text->cached_texture, drawn_text->color.a);
-        SDL_FreeSurface(surface);
+        SDL_DestroySurface(surface);
 
-        SDL_QueryTexture(drawn_text->cached_texture, NULL, NULL, &drawn_text->text_rect.w, &drawn_text->text_rect.h);
+        SDL_GetTextureSize(drawn_text->cached_texture, &drawn_text->text_rect.w, &drawn_text->text_rect.h);
 
         drawn_text->text_rect.w /= global_text_dpi_scale_factor;
         drawn_text->text_rect.h /= global_text_dpi_scale_factor;
     }
 
-    SDL_RenderCopy(global_renderer, drawn_text->cached_texture, NULL, &drawn_text->text_rect);
+    SDL_RenderTexture(global_renderer, drawn_text->cached_texture, NULL, &drawn_text->text_rect);
 }
 
 void draw_text_int32(Drawn_Text_Int32* drawn_text, int32 current_value)
@@ -215,19 +215,19 @@ void draw_text_int32(Drawn_Text_Int32* drawn_text, int32 current_value)
         SDL_assert(drawn_text->font_size > 0);
         int32 pt_size = get_font_pt_size(drawn_text->font_size);
         TTF_Font* font = get_font(pt_size);
-        SDL_Surface* surface = TTF_RenderText_Blended(font, drawn_text->text_string, drawn_text->color);
+        SDL_Surface* surface = TTF_RenderText_Blended(font, drawn_text->text_string, strlen(drawn_text->text_string), drawn_text->color);
         drawn_text->cached_texture = SDL_CreateTextureFromSurface(global_renderer, surface);
         // Pass-through the color's alpha channel to control opacity
         SDL_SetTextureAlphaMod(drawn_text->cached_texture, drawn_text->color.a);
-        SDL_FreeSurface(surface);
+        SDL_DestroySurface(surface);
 
-        SDL_QueryTexture(drawn_text->cached_texture, NULL, NULL, &drawn_text->text_rect.w, &drawn_text->text_rect.h);
+        SDL_GetTextureSize(drawn_text->cached_texture, &drawn_text->text_rect.w, &drawn_text->text_rect.h);
 
         drawn_text->text_rect.w /= global_text_dpi_scale_factor;
         drawn_text->text_rect.h /= global_text_dpi_scale_factor;
     }
 
-    SDL_RenderCopy(global_renderer, drawn_text->cached_texture, NULL, &drawn_text->text_rect);
+    SDL_RenderTexture(global_renderer, drawn_text->cached_texture, NULL, &drawn_text->text_rect);
 }
 
 struct Screen_Space_Position
@@ -260,9 +260,12 @@ void draw_canvas()
     drawable_canvas.h = LOGICAL_HEIGHT;
 
     // Set the clip rectangle to restrict rendering
-    SDL_RenderSetClipRect(global_renderer, &drawable_canvas);
+    SDL_SetRenderClipRect(global_renderer, &drawable_canvas);
 
     // Use a neutral background color to not cause too much eye strain
     SDL_SetRenderDrawColor(global_renderer, 40, 40, 40, 255);
-    SDL_RenderFillRect(global_renderer, &drawable_canvas);
+
+    SDL_FRect frect_canvas;
+    SDL_RectToFRect(&drawable_canvas, &frect_canvas);
+    SDL_RenderFillRect(global_renderer, &frect_canvas);
 }

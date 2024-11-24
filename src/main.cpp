@@ -3,7 +3,7 @@
 
 #include <iostream>
 #include <SDL3/SDL.h>
-// #include <SDL2/SDL_ttf.h>
+#include <SDL3_ttf/SDL_ttf.h>
 // #include <SDL2/SDL_mixer.h>
 
 #ifdef __WINDOWS__
@@ -47,7 +47,7 @@ int32 global_running = 1;
 SDL_Window* global_window;
 SDL_Renderer* global_renderer;
 
-real32 global_text_dpi_scale_factor;
+real32 global_text_dpi_scale_factor = 1.f;
 
 bool32 global_display_debug_info;
 
@@ -94,10 +94,9 @@ uint64 global_total_cycles_elapsed;
 
 // clang-format off
 #include "sdl_events.cpp"
-// #include "render.cpp"
+#include "render.cpp"
 // #include "audio.cpp"
 
-#if 0
 typedef struct Scene
 {
     void (*reset_state)(struct Scene* scene);
@@ -111,12 +110,11 @@ Scene* global_next_scene;
 Scene* global_current_scene;
 Scene global_start_screen_scene;
 Scene global_gameplay_scene;
-#endif
 
 // Audio_Context global_audio_context;
 
-// #include "scenes/start_screen.cpp"
-// #include "scenes/gameplay.cpp"
+#include "scenes/start_screen.cpp"
+#include "scenes/gameplay.cpp"
 // clang-format on
 #if 0
 int32 filterEvent(void* userdata, SDL_Event* event)
@@ -162,12 +160,12 @@ int32 main(int32 argc, char* argv[])
         return SDL_APP_FAILURE;
     }
 
-#if 0
-    if (TTF_Init() == -1)
+    if (!TTF_Init())
     {
-        std::cerr << "Failed to initialize SDL_ttf: " << TTF_GetError() << std::endl;
+        std::cerr << "Failed to initialize SDL_ttf: " << SDL_GetError() << std::endl;
         return -1;
     }
+#if 0
 
     if (SDL_Init(SDL_INIT_AUDIO) < 0) {
         printf("SDL could not initialize! SDL_Error: %s\n", SDL_GetError());
@@ -250,13 +248,12 @@ int32 main(int32 argc, char* argv[])
     real32 debug_y_start_offset = (int32)(LOGICAL_HEIGHT * 0.01f);
     real32 debug_padding = 5.0f;
 
-#if 0
     // Get font height for offset
     real32 font_height;
     {
         real32 font_pt_size = get_font_pt_size(font_size);
         TTF_Font* font = get_font(font_pt_size);
-        font_height = TTF_FontHeight(font) / global_text_dpi_scale_factor;
+        font_height = TTF_GetFontHeight(font) / global_text_dpi_scale_factor;
     }
     real32 vertical_offset = font_height + debug_padding;
     real32 y_offset = 0;
@@ -348,7 +345,7 @@ int32 main(int32 argc, char* argv[])
     }
 
     global_current_scene = &global_start_screen_scene;
-#endif
+
     while (global_running)
     {
 //==============================
@@ -438,12 +435,9 @@ int32 main(int32 argc, char* argv[])
 
         {  // Input and event handling
             handle_events(&event, &input);
-#if 0
             global_current_scene->handle_input(global_current_scene, &input);
-#endif
         }
 
-#if 0
         {  // Scene Manager
             if (global_next_scene) {
                 global_current_scene = global_next_scene;
@@ -451,9 +445,7 @@ int32 main(int32 argc, char* argv[])
                 global_next_scene = 0;
             }
         }
-#endif
 
-#if 0
         { // Update Scene
             // Gameplay_State state_to_render;
             // https://gafferongames.com/post/fix_your_timestep/
@@ -486,7 +478,6 @@ int32 main(int32 argc, char* argv[])
             // state_to_render = current_state * alpha + previous_state * (1.0f - alpha);
             // state_to_render = current_state;
         }
-#endif
 
 //==============================
 // TIMING
@@ -500,11 +491,9 @@ int32 main(int32 argc, char* argv[])
             SDL_SetRenderDrawColor(global_renderer, 0, 0, 0, 255);  // Black background
             SDL_RenderClear(global_renderer);
 
-#if 0
             global_current_scene->render(global_current_scene);
-#endif
 
-#if 0 // Render Debug Info
+#if 1 // Render Debug Info
             if (global_display_debug_info)
             {
                 // TODO: remove this when changing the win32 stuff

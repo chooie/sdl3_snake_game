@@ -1,6 +1,6 @@
-#include <SDL2/SDL.h>
+#include <SDL3/SDL.h>
 
-#include "../audio.h"
+// #include "../audio.h"
 #include "../common.h"
 
 typedef enum
@@ -194,7 +194,7 @@ void gameplay__handle_input(Scene* scene, Input* input)
     if (pressed(BUTTON_ESCAPE))
     {
         global_current_scene = &global_start_screen_scene;
-        stop_music();
+        // stop_music();
     }
 
     if (pressed(BUTTON_SPACE) && !state->game_over)
@@ -261,8 +261,8 @@ void gameplay__update(struct Scene* scene, real64 simulation_time_elapsed, real3
     if (state->is_starting)
     {
         state->is_starting = 0;
-        play_music(&global_audio_context);
-        set_music_volume(10.f);
+        // play_music(&global_audio_context);
+        // set_music_volume(10.f);
     }
 
     if (state->game_over || state->is_paused)
@@ -320,7 +320,7 @@ void gameplay__update(struct Scene* scene, real64 simulation_time_elapsed, real3
         {  // Blip collision
             if (state->pos_x == state->blip_pos_x && state->pos_y == state->blip_pos_y)
             {
-                play_sound_effect(global_audio_context.effect_beep_2);
+                // play_sound_effect(global_audio_context.effect_beep_2);
 
                 {  // Grow snake part
                     Snake_Part new_snake_part = {};
@@ -423,7 +423,7 @@ void gameplay__update(struct Scene* scene, real64 simulation_time_elapsed, real3
 
             if (state->game_over)
             {
-                play_sound_effect(global_audio_context.effect_boom);
+                // play_sound_effect(global_audio_context.effect_boom);
             }
         }
 
@@ -469,22 +469,22 @@ void create_grid_texture(SDL_Renderer* renderer)
     {
         for (uint32 column_index = 0; column_index < X_GRIDS; column_index++)
         {
-            SDL_Rect grid_block;
-            grid_block.x = (int32)(column_index * GRID_BLOCK_SIZE);
-            grid_block.y = (int32)(row_index * GRID_BLOCK_SIZE);
-            grid_block.w = (int32)(GRID_BLOCK_SIZE);
-            grid_block.h = (int32)(GRID_BLOCK_SIZE);
+            SDL_FRect grid_block;
+            grid_block.x = (real32)(column_index * GRID_BLOCK_SIZE);
+            grid_block.y = (real32)(row_index * GRID_BLOCK_SIZE);
+            grid_block.w = (real32)(GRID_BLOCK_SIZE);
+            grid_block.h = (real32)(GRID_BLOCK_SIZE);
 
             // Draw the white border rectangle
             SDL_SetRenderDrawColor(renderer, white_color.r, white_color.g, white_color.b, white_color.a);
             SDL_RenderFillRect(renderer, &grid_block);
 
             // Shrink the grey rectangle by the border thickness to draw it inside the border
-            SDL_Rect inner_block;
-            inner_block.x = (int32)(grid_block.x + border_thickness);
-            inner_block.y = (int32)(grid_block.y + border_thickness);
-            inner_block.w = (int32)(grid_block.w - (2 * border_thickness));
-            inner_block.h = (int32)(grid_block.h - (2 * border_thickness));
+            SDL_FRect inner_block;
+            inner_block.x = (real32)(grid_block.x + border_thickness);
+            inner_block.y = (real32)(grid_block.y + border_thickness);
+            inner_block.w = (real32)(grid_block.w - (2 * border_thickness));
+            inner_block.h = (real32)(grid_block.h - (2 * border_thickness));
 
             // Draw the dark grey fill within the border
             SDL_SetRenderDrawColor(renderer, grey_color.r, grey_color.g, grey_color.b, grey_color.a);
@@ -508,7 +508,7 @@ void render_grid(SDL_Renderer* renderer)
     }
 
     // Render the cached grid texture to the screen
-    SDL_RenderCopy(renderer, grid_texture, NULL, NULL);
+    SDL_RenderTexture(renderer, grid_texture, NULL, NULL);
 }
 
 void gameplay__render(Scene* scene)
@@ -526,11 +526,11 @@ void gameplay__render(Scene* scene)
 
         real32 size = GRID_BLOCK_SIZE * 0.5f;
 
-        SDL_Rect square = {};
-        square.x = (int32)(square_screen_pos.x + ((real32)GRID_BLOCK_SIZE / 2) - (size / 2));
-        square.y = (int32)(square_screen_pos.y + ((real32)GRID_BLOCK_SIZE / 2) - (size / 2));
-        square.w = (int32)size;
-        square.h = (int32)size;
+        SDL_FRect square = {};
+        square.x = (real32)(square_screen_pos.x + ((real32)GRID_BLOCK_SIZE / 2) - (size / 2));
+        square.y = (real32)(square_screen_pos.y + ((real32)GRID_BLOCK_SIZE / 2) - (size / 2));
+        square.w = (real32)size;
+        square.h = (real32)size;
 
         SDL_Color color = {52, 152, 219, 255};
         draw_rect(square, color);
@@ -540,11 +540,11 @@ void gameplay__render(Scene* scene)
         Screen_Space_Position square_screen_pos =
             map_world_space_position_to_screen_space_position(state->pos_x, state->pos_y);
 
-        SDL_Rect square = {};
-        square.x = (int32)(square_screen_pos.x);
-        square.y = (int32)(square_screen_pos.y);
-        square.w = (int32)GRID_BLOCK_SIZE;
-        square.h = (int32)GRID_BLOCK_SIZE;
+        SDL_FRect square = {};
+        square.x = (real32)(square_screen_pos.x);
+        square.y = (real32)(square_screen_pos.y);
+        square.w = (real32)GRID_BLOCK_SIZE;
+        square.h = (real32)GRID_BLOCK_SIZE;
 
         SDL_Color red = {171, 70, 66, 255};
         draw_rect(square, red);
@@ -555,11 +555,11 @@ void gameplay__render(Scene* scene)
             Screen_Space_Position screen_pos =
                 map_world_space_position_to_screen_space_position(snake_part->pos_x, snake_part->pos_y);
 
-            SDL_Rect square = {};
-            square.x = (int32)(screen_pos.x);
-            square.y = (int32)(screen_pos.y);
-            square.w = (int32)GRID_BLOCK_SIZE;
-            square.h = (int32)GRID_BLOCK_SIZE;
+            SDL_FRect square = {};
+            square.x = (real32)(screen_pos.x);
+            square.y = (real32)(screen_pos.y);
+            square.w = (real32)GRID_BLOCK_SIZE;
+            square.h = (real32)GRID_BLOCK_SIZE;
 
             SDL_Color darkened_red = {154, 63, 59, 255};
             draw_rect(square, darkened_red);

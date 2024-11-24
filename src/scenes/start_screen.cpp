@@ -1,4 +1,4 @@
-#include <SDL2/SDL.h>
+#include <SDL3/SDL.h>
 
 // TODO: Move this somewhere
 bool32 are_colors_equal(SDL_Color color1, SDL_Color color2)
@@ -91,7 +91,7 @@ void start_screen__handle_input(Scene* scene, Input* input)
 
     if (pressed(BUTTON_D) || pressed(BUTTON_A))
     {
-        play_sound_effect(global_audio_context.effect_beep);
+        // play_sound_effect(global_audio_context.effect_beep);
     }
 
     if (pressed(BUTTON_D))
