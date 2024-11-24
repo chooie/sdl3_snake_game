@@ -2,9 +2,9 @@
 #include "common.h"
 
 #include <iostream>
-#include <SDL2/SDL.h>
-#include <SDL2/SDL_ttf.h>
-#include <SDL2/SDL_mixer.h>
+#include <SDL3/SDL.h>
+// #include <SDL2/SDL_ttf.h>
+// #include <SDL2/SDL_mixer.h>
 
 #ifdef __WINDOWS__
 #include <windows.h>
@@ -68,6 +68,7 @@ struct Master_Timer
                                                       // the physics sees
 };
 
+#if 0
 void set_dpi()
 {
     real32 dpi;
@@ -80,6 +81,7 @@ void set_dpi()
     real32 base_DPI = 72.0f;
     global_text_dpi_scale_factor = dpi / base_DPI;
 }
+#endif
 
 #ifdef __WIN32__
 uint64 global_last_cycle_count;
@@ -91,11 +93,12 @@ uint64 global_total_cycles_elapsed;
 #define DYNAMIC_SCORE_LENGTH 5
 
 // clang-format off
-#include "input.cpp"
+#include "sdl_events.cpp"
 // #include "game.cpp"
-#include "render.cpp"
-#include "audio.cpp"
+// #include "render.cpp"
+// #include "audio.cpp"
 
+#if 0
 typedef struct Scene
 {
     void (*reset_state)(struct Scene* scene);
@@ -109,13 +112,14 @@ Scene* global_next_scene;
 Scene* global_current_scene;
 Scene global_start_screen_scene;
 Scene global_gameplay_scene;
+#endif
 
-Audio_Context global_audio_context;
+// Audio_Context global_audio_context;
 
-#include "scenes/start_screen.cpp"
-#include "scenes/gameplay.cpp"
+// #include "scenes/start_screen.cpp"
+// #include "scenes/gameplay.cpp"
 // clang-format on
-
+#if 0
 int32 filterEvent(void* userdata, SDL_Event* event)
 {
     Input* input = (Input*)(userdata);
@@ -134,11 +138,32 @@ int32 filterEvent(void* userdata, SDL_Event* event)
     }
     return 1;  // Allow other events
 }
+#endif
 
 int32 main(int32 argc, char* argv[])
 {
-    SDL_Init(SDL_INIT_EVERYTHING);
+    if (!SDL_SetAppMetadata("Snake game", "1.0", "com.choo.Snake"))
+    {
+        return SDL_APP_FAILURE;
+    }
 
+    if (!SDL_Init(SDL_INIT_VIDEO))
+    {
+        return SDL_APP_FAILURE;
+    }
+
+    if (!SDL_CreateWindowAndRenderer("SDL Snake Game",
+                                     LOGICAL_WIDTH,
+                                     LOGICAL_HEIGHT,
+                                     0,
+                                     &global_window,
+                                     &global_renderer))
+    {
+        std::cerr << "SDL_CreateWindowAndRenderer Error: " << SDL_GetError() << std::endl;
+        return SDL_APP_FAILURE;
+    }
+
+#if 0
     if (TTF_Init() == -1)
     {
         std::cerr << "Failed to initialize SDL_ttf: " << TTF_GetError() << std::endl;
@@ -161,32 +186,14 @@ int32 main(int32 argc, char* argv[])
         return -1;
     }
 
-    global_window = SDL_CreateWindow("SDL Starter",
-                                     SDL_WINDOWPOS_CENTERED,
-                                     SDL_WINDOWPOS_CENTERED,
-                                     LOGICAL_WIDTH,
-                                     LOGICAL_HEIGHT,
-                                     SDL_WINDOW_ALLOW_HIGHDPI | SDL_WINDOW_RESIZABLE | SDL_WINDOW_SHOWN);
-    if (!global_window)
-    {
-        std::cout << "Could not create window: " << SDL_GetError() << std::endl;
-        return 1;
-    }
+#endif
 
-    global_renderer = SDL_CreateRenderer(global_window, -1, SDL_RENDERER_ACCELERATED);
-    if (!global_renderer)
-    {
-        fprintf(stderr, "SDL_CreateRenderer Error: %s\n", SDL_GetError());
-        SDL_DestroyWindow(global_window);
-        SDL_Quit();
-        return EXIT_FAILURE;
-    }
-    SDL_RenderSetLogicalSize(global_renderer, LOGICAL_WIDTH, LOGICAL_HEIGHT);
+    // SDL_SetRenderLogicalPresentation(global_renderer, LOGICAL_WIDTH, LOGICAL_HEIGHT, SDL_LOGICAL_PRESENTATION_STRETCH);
 
     // Set linear scaling for smoother scaling
-    SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "1");
+    // SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "1");
 
-    SDL_RenderSetVSync(global_renderer, VSYNC_ENABLED);
+    SDL_SetRenderVSync(global_renderer, VSYNC_ENABLED);
 
     // const char* platform = SDL_GetPlatform();
     // std::cout << "Platform " << platform << std::endl;
@@ -197,17 +204,21 @@ int32 main(int32 argc, char* argv[])
 
 // Set macOS-specific hint
 #ifdef __APPLE__
-    SDL_SetHint(SDL_HINT_VIDEO_MAC_FULLSCREEN_SPACES, "1");
-    SDL_SetHint(SDL_HINT_RENDER_DRIVER, "metal");
-    SDL_SetHint(SDL_HINT_VIDEO_HIGHDPI_DISABLED, "1");
+    // SDL_SetHint(SDL_HINT_VIDEO_MAC_FULLSCREEN_SPACES, "1");
+    // SDL_SetHint(SDL_HINT_RENDER_DRIVER, "metal");
+    // SDL_SetHint(SDL_HINT_VIDEO_HIGHDPI_DISABLED, "1");
 #endif
 
+#if 0
     set_dpi();
+#endif
 
     SDL_Event event;
     Input input = {};
 
+#if 0
     SDL_SetEventFilter(filterEvent, &input);
+#endif
 
     Master_Timer master_timer = {};
     master_timer.COUNTER_FREQUENCY = SDL_GetPerformanceFrequency();
@@ -240,6 +251,7 @@ int32 main(int32 argc, char* argv[])
     real32 debug_y_start_offset = (int32)(LOGICAL_HEIGHT * 0.01f);
     real32 debug_padding = 5.0f;
 
+#if 0
     // Get font height for offset
     real32 font_height;
     {
@@ -337,7 +349,7 @@ int32 main(int32 argc, char* argv[])
     }
 
     global_current_scene = &global_start_screen_scene;
-
+#endif
     while (global_running)
     {
 //==============================
@@ -427,9 +439,12 @@ int32 main(int32 argc, char* argv[])
 
         {  // Input and event handling
             handle_input(&event, &input);
+#if 0
             global_current_scene->handle_input(global_current_scene, &input);
+#endif
         }
 
+#if 0
         {  // Scene Manager
             if (global_next_scene) {
                 global_current_scene = global_next_scene;
@@ -437,7 +452,9 @@ int32 main(int32 argc, char* argv[])
                 global_next_scene = 0;
             }
         }
+#endif
 
+#if 0
         { // Update Scene
             // Gameplay_State state_to_render;
             // https://gafferongames.com/post/fix_your_timestep/
@@ -470,6 +487,7 @@ int32 main(int32 argc, char* argv[])
             // state_to_render = current_state * alpha + previous_state * (1.0f - alpha);
             // state_to_render = current_state;
         }
+#endif
 
 //==============================
 // TIMING
@@ -483,9 +501,11 @@ int32 main(int32 argc, char* argv[])
             SDL_SetRenderDrawColor(global_renderer, 0, 0, 0, 255);  // Black background
             SDL_RenderClear(global_renderer);
 
+#if 0
             global_current_scene->render(global_current_scene);
+#endif
 
-#if 1 // Render Debug Info
+#if 0 // Render Debug Info
             if (global_display_debug_info)
             {
                 // TODO: remove this when changing the win32 stuff
@@ -649,7 +669,7 @@ int32 main(int32 argc, char* argv[])
                 char fps_str[30];  // Allocate enough space for the string
                 snprintf(fps_str, 30, "%.2f", fps);
 
-                char title_str[100] = "SDL Starter (FPS: ";
+                char title_str[100] = "SDL Snake Game (FPS: ";
                 int index_to_start_adding = 0;
                 while (title_str[index_to_start_adding] != '\0')
                 {
@@ -751,10 +771,12 @@ int32 main(int32 argc, char* argv[])
 //==============================
     } // end while (global_running)
 
+#if 0
     cleanup_fonts();
+    TTF_Quit();
+#endif
     SDL_DestroyRenderer(global_renderer);
     SDL_DestroyWindow(global_window);
-    TTF_Quit();
     SDL_Quit();
 
     return EXIT_SUCCESS;
