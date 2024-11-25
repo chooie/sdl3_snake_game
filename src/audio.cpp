@@ -9,11 +9,16 @@ bool32 audio_init(Audio_Context* ctx)
         return 0;
     }
 
-    // Load audio files
-    ctx->background_music = Mix_LoadMUS("music/mixkit-feast-from-the-east.mp3");
-    if (!ctx->background_music)
+    ctx->start_screen_background_music = Mix_LoadMUS("music/pretty-love-crystalline-synth-melody_142bpm_G_major.wav");
+    if (!ctx->start_screen_background_music)
     {
-        fprintf(stderr, "Failed to load background music! Mix_Error: %s\n", SDL_GetError());
+        fprintf(stderr, "Failed to load start screen background music! Mix_Error: %s\n", SDL_GetError());
+    }
+
+    ctx->gameplay_background_music = Mix_LoadMUS("music/mixkit-feast-from-the-east.mp3");
+    if (!ctx->gameplay_background_music)
+    {
+        fprintf(stderr, "Failed to load gameplay background music! Mix_Error: %s\n", SDL_GetError());
     }
 
     ctx->effect_beep = Mix_LoadWAV("sounds/beep.wav");
@@ -41,9 +46,13 @@ bool32 audio_init(Audio_Context* ctx)
 
 void audio_cleanup(Audio_Context* ctx)
 {
-    if (ctx->background_music)
+    if (ctx->start_screen_background_music)
     {
-        Mix_FreeMusic(ctx->background_music);
+        Mix_FreeMusic(ctx->start_screen_background_music);
+    }
+    if (ctx->gameplay_background_music)
+    {
+        Mix_FreeMusic(ctx->gameplay_background_music);
     }
     if (ctx->effect_beep)
     {
@@ -56,11 +65,11 @@ void audio_cleanup(Audio_Context* ctx)
     Mix_CloseAudio();
 }
 
-void play_music(Audio_Context* ctx)
+void play_music(Mix_Music* music)
 {
-    if (ctx->background_music)
+    if (music)
     {
-        Mix_PlayMusic(ctx->background_music, -1);
+        Mix_PlayMusic(music, -1);
     }
 }
 

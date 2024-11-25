@@ -27,6 +27,7 @@ typedef enum
 
 struct Start_Screen__State
 {
+    bool32 is_starting;
     Menu_Texts* menu_texts;
     SDL_Color blink_color;
     Start_Screen__Option current_option;
@@ -35,6 +36,7 @@ struct Start_Screen__State
 void start_screen__reset_state(Scene* scene)
 {
     Start_Screen__State* state = (Start_Screen__State*)scene->state;
+    state->is_starting = 1;
     state->blink_color = white;
     state->current_option = Start_Screen_Option__Start_Game;
 }
@@ -129,6 +131,13 @@ void start_screen__update(struct Scene* scene,
                           real32 dt_s)
 {
     Start_Screen__State* state = (Start_Screen__State*)scene->state;
+
+    if (state->is_starting)
+    {
+        state->is_starting = 0;
+        play_music(global_audio_context.start_screen_background_music);
+        set_music_volume(10.f);
+    }
 
     SDL_Color yellow = {196, 160, 3, 255};   // Yellow
     SDL_Color white = {255, 255, 255, 255};  // White

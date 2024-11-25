@@ -130,7 +130,7 @@ bool filterEvent(void* userdata, SDL_Event* event)
 
 int32 main(int32 argc, char* argv[])
 {
-    if (!SDL_SetAppMetadata("Snake game", "1.0", "com.choo.Snake"))
+    if (!SDL_SetAppMetadata("SDL3 Snake Game", "1.0", "com.choo.Snake"))
     {
         return SDL_APP_FAILURE;
     }
@@ -142,7 +142,7 @@ int32 main(int32 argc, char* argv[])
 
     {  // Window and Renderer
 
-        if (!SDL_CreateWindowAndRenderer("SDL Snake Game",
+        if (!SDL_CreateWindowAndRenderer("SDL3 Snake Game",
                                          LOGICAL_WIDTH,
                                          LOGICAL_HEIGHT,
                                          SDL_WINDOW_RESIZABLE | SDL_WINDOW_HIGH_PIXEL_DENSITY,
@@ -634,7 +634,7 @@ int32 main(int32 argc, char* argv[])
                 char fps_str[30];  // Allocate enough space for the string
                 snprintf(fps_str, 30, "%.2f", fps);
 
-                char title_str[100] = "SDL Snake Game (FPS: ";
+                char title_str[100] = "SDL3 Snake Game (FPS: ";
                 int index_to_start_adding = 0;
                 while (title_str[index_to_start_adding] != '\0')
                 {

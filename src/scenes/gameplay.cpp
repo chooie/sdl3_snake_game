@@ -193,8 +193,7 @@ void gameplay__handle_input(Scene* scene, Input* input)
 
     if (pressed(BUTTON_ESCAPE))
     {
-        global_current_scene = &global_start_screen_scene;
-        stop_music();
+        global_next_scene = &global_start_screen_scene;
     }
 
     if (pressed(BUTTON_SPACE) && !state->game_over)
@@ -261,7 +260,7 @@ void gameplay__update(struct Scene* scene, real64 simulation_time_elapsed, real3
     if (state->is_starting)
     {
         state->is_starting = 0;
-        play_music(&global_audio_context);
+        play_music(global_audio_context.gameplay_background_music);
         set_music_volume(10.f);
     }
 
