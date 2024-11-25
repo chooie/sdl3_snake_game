@@ -4,7 +4,7 @@
 #include <iostream>
 #include <SDL3/SDL.h>
 #include <SDL3_ttf/SDL_ttf.h>
-// #include <SDL2/SDL_mixer.h>
+#include <SDL3_mixer/SDL_mixer.h>
 
 #ifdef __WINDOWS__
 #include <windows.h>
@@ -93,7 +93,7 @@ uint64 global_total_cycles_elapsed;
 // clang-format off
 #include "sdl_events.cpp"
 #include "render.cpp"
-// #include "audio.cpp"
+#include "audio.cpp"
 
 typedef struct Scene
 {
@@ -109,25 +109,24 @@ Scene* global_current_scene;
 Scene global_start_screen_scene;
 Scene global_gameplay_scene;
 
-// Audio_Context global_audio_context;
+Audio_Context global_audio_context;
 
 #include "scenes/start_screen.cpp"
 #include "scenes/gameplay.cpp"
 // clang-format on
 
-#if 1
-int32 filterEvent(void* userdata, SDL_Event* event)
+bool filterEvent(void* userdata, SDL_Event* event)
 {
     Input* input = (Input*)(userdata);
 
     if (event->type == SDL_EVENT_WINDOW_RESIZED)
     {
         SDL_GetWindowSize(global_window, &window_width, &window_height);
+        set_dpi();
     }
 
-    return 1;  // Allow other events
+    return true;  // Allow other events
 }
-#endif
 
 int32 main(int32 argc, char* argv[])
 {
@@ -168,25 +167,12 @@ int32 main(int32 argc, char* argv[])
         std::cerr << "Failed to initialize SDL_ttf: " << SDL_GetError() << std::endl;
         return -1;
     }
-#if 0
-
-    if (SDL_Init(SDL_INIT_AUDIO) < 0) {
-        printf("SDL could not initialize! SDL_Error: %s\n", SDL_GetError());
-        return 1;
-    }
-
-    if (Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 2048) < 0) {
-        printf("SDL_mixer could not initialize! SDL_mixer Error: %s\n", Mix_GetError());
-        return 1;
-    }
 
     if (!audio_init(&global_audio_context)) {
         fprintf(stderr, "Failed to initialize audio.\n");
         SDL_Quit();
         return -1;
     }
-
-#endif
 
     // const char* platform = SDL_GetPlatform();
     // std::cout << "Platform " << platform << std::endl;
@@ -206,9 +192,7 @@ int32 main(int32 argc, char* argv[])
     SDL_Event event;
     Input input = {};
 
-#if 0
     SDL_SetEventFilter(filterEvent, &input);
-#endif
 
     Master_Timer master_timer = {};
     master_timer.COUNTER_FREQUENCY = SDL_GetPerformanceFrequency();

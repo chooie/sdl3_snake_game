@@ -91,7 +91,7 @@ void start_screen__handle_input(Scene* scene, Input* input)
 
     if (pressed(BUTTON_D) || pressed(BUTTON_A))
     {
-        // play_sound_effect(global_audio_context.effect_beep);
+        play_sound_effect(global_audio_context.effect_beep);
     }
 
     if (pressed(BUTTON_D))

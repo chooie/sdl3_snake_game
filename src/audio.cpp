@@ -3,40 +3,40 @@
 
 bool32 audio_init(Audio_Context* ctx)
 {
-    if (Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 2048) < 0)
+    if (!Mix_OpenAudio(0, 0))
     {
-        fprintf(stderr, "SDL_mixer could not initialize! Mix_Error: %s\n", Mix_GetError());
-        return false;
+        fprintf(stderr, "SDL_mixer could not initialize! Mix_Error: %s\n", SDL_GetError());
+        return 0;
     }
 
     // Load audio files
     ctx->background_music = Mix_LoadMUS("music/mixkit-feast-from-the-east.mp3");
     if (!ctx->background_music)
     {
-        fprintf(stderr, "Failed to load background music! Mix_Error: %s\n", Mix_GetError());
+        fprintf(stderr, "Failed to load background music! Mix_Error: %s\n", SDL_GetError());
     }
 
     ctx->effect_beep = Mix_LoadWAV("sounds/beep.wav");
     if (!ctx->effect_beep)
     {
-        fprintf(stderr, "Failed to load beep sound effect! Mix_Error: %s\n", Mix_GetError());
+        fprintf(stderr, "Failed to load beep sound effect! Mix_Error: %s\n", SDL_GetError());
     }
 
     ctx->effect_beep_2 = Mix_LoadWAV("sounds/beep-2.mp3");
 
     if (!ctx->effect_beep_2)
     {
-        fprintf(stderr, "Failed to load beep 2 sound effect! Mix_Error: %s\n", Mix_GetError());
+        fprintf(stderr, "Failed to load beep 2 sound effect! Mix_Error: %s\n", SDL_GetError());
     }
 
     ctx->effect_boom = Mix_LoadWAV("sounds/boom.mp3");
 
     if (!ctx->effect_beep_2)
     {
-        fprintf(stderr, "Failed to load boom sound effect! Mix_Error: %s\n", Mix_GetError());
+        fprintf(stderr, "Failed to load boom sound effect! Mix_Error: %s\n", SDL_GetError());
     }
 
-    return true;
+    return 1;
 }
 
 void audio_cleanup(Audio_Context* ctx)

@@ -1,6 +1,6 @@
 #include <SDL3/SDL.h>
 
-// #include "../audio.h"
+#include "../audio.h"
 #include "../common.h"
 
 typedef enum
@@ -194,7 +194,7 @@ void gameplay__handle_input(Scene* scene, Input* input)
     if (pressed(BUTTON_ESCAPE))
     {
         global_current_scene = &global_start_screen_scene;
-        // stop_music();
+        stop_music();
     }
 
     if (pressed(BUTTON_SPACE) && !state->game_over)
@@ -261,8 +261,8 @@ void gameplay__update(struct Scene* scene, real64 simulation_time_elapsed, real3
     if (state->is_starting)
     {
         state->is_starting = 0;
-        // play_music(&global_audio_context);
-        // set_music_volume(10.f);
+        play_music(&global_audio_context);
+        set_music_volume(10.f);
     }
 
     if (state->game_over || state->is_paused)
@@ -320,7 +320,7 @@ void gameplay__update(struct Scene* scene, real64 simulation_time_elapsed, real3
         {  // Blip collision
             if (state->pos_x == state->blip_pos_x && state->pos_y == state->blip_pos_y)
             {
-                // play_sound_effect(global_audio_context.effect_beep_2);
+                play_sound_effect(global_audio_context.effect_beep_2);
 
                 {  // Grow snake part
                     Snake_Part new_snake_part = {};
@@ -423,7 +423,7 @@ void gameplay__update(struct Scene* scene, real64 simulation_time_elapsed, real3
 
             if (state->game_over)
             {
-                // play_sound_effect(global_audio_context.effect_boom);
+                play_sound_effect(global_audio_context.effect_boom);
             }
         }
 
