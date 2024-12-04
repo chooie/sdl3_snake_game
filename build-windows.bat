@@ -4,13 +4,16 @@ call "C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Auxiliary\Build
 echo "Starting..."
 echo %CD%
 
-set "build_dir_created=false"
-
 :: %~dp0 is relative to current file path
 set BUILD_DIR=%~dp0build
 IF NOT EXIST %BUILD_DIR% (
     mkdir %BUILD_DIR%
-    set "build_dir_created=true"
+    echo Copying SDL3.dll to the build directory
+    copy /Y %~dp0vendor\SDL3\windows\lib\x64\SDL3.dll build\
+    echo Copying SDL3_mixer.dll to the build directory
+    copy /Y %~dp0vendor\SDL3_mixer\windows\lib\x64\SDL3_mixer.dll build\
+    echo Copying SDL3_tff.dll to the build directory
+    copy /Y %~dp0vendor\SDL3_ttf\windows\lib\x64\SDL3_ttf.dll build\
 )
 
 pushd %BUILD_DIR%
@@ -22,14 +25,39 @@ if "%hour:~0,1%" == " " set hour=0%hour:~1,1%
 rem Create the timestamp
 set timestamp=%date:~-4,4%%date:~-10,2%%date:~-7,2%_%hour%%time:~3,2%%time:~6,2%
 rem Set the filename
-set filename=sdl_snake_game%timestamp%.pdb
+set filename=sdl3_snake_game%timestamp%.pdb
 
 del %BUILD_DIR%\*.pdb > NUL 2> NUL
-set INCLUDE_PATH=%~dp0vendor\SDL2\windows\visual_studio\x64\include
-set LIB_PATH=%~dp0vendor\SDL2\windows\visual_studio\x64\lib
+set SDL3__INCLUDE_PATH=%~dp0vendor\SDL3\windows\include
+set SDL3__LIB_PATH=%~dp0vendor\SDL3\windows\lib\x64
+set SDL3_MIXER__INCLUDE_PATH=%~dp0vendor\SDL3_mixer\windows\include
+set SDL3_MIXER__LIB_PATH=%~dp0vendor\SDL3_mixer\windows\lib\x64
+set SDL3_TTF__INCLUDE_PATH=%~dp0vendor\SDL3_ttf\windows\include
+set SDL3_TTF__LIB_PATH=%~dp0vendor\SDL3_ttf\windows\lib\x64
 
-REM Compile main.cpp
-cl /Zi /W4 /WX /wd4100 /wd4189 /MD /EHsc /D_CRT_SECURE_NO_WARNINGS %~dp0src\main.cpp /I %INCLUDE_PATH% /link -PDB:%filename% /LIBPATH:%LIB_PATH% SDL2.lib SDL2main.lib SDL2_ttf.lib shell32.lib winmm.lib /SUBSYSTEM:CONSOLE
+cl ^
+  /Zi ^
+  /W4 ^
+  /WX ^
+  /wd4100 ^
+  /wd4101 ^
+  /wd4189 ^
+  /wd4456 ^
+  /wd4459 ^
+  /MD ^
+  /EHsc ^
+  /D_CRT_SECURE_NO_WARNINGS ^
+  %~dp0src\main.cpp ^
+  /I %SDL3__INCLUDE_PATH% ^
+  /I %SDL3_MIXER__INCLUDE_PATH% ^
+  /I %SDL3_ttf__INCLUDE_PATH% ^
+  /link ^
+  /LIBPATH:%SDL3__LIB_PATH% ^
+  /LIBPATH:%SDL3_MIXER__LIB_PATH% ^
+  /LIBPATH:%SDL3_TTF__LIB_PATH% ^
+  -PDB:%filename% ^
+  SDL3.lib SDL3_mixer.lib SDL3_ttf.lib ^
+  /SUBSYSTEM:CONSOLE
 REM TODO: use /SUBSYSTEM:WINDOWS for release to avoid opening a console
 
 REM Check if compilation was successful
@@ -40,11 +68,3 @@ if %errorlevel% neq 0 (
     echo Compilation succeeded.
 )
 popd
-
-REM Only copy dlls if the build directory was just created
-if "%build_dir_created%"=="true" (
-    echo Copying SDL2.dll to the build directory
-    copy /Y %~dp0vendor\SDL2\windows\visual_studio\x64\lib\SDL2.dll build\
-    echo Copying SDL2_tff.dll to the build directory
-    copy /Y %~dp0vendor\SDL2\windows\visual_studio\x64\lib\SDL2_ttf.dll build\
-)

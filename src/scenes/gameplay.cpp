@@ -130,6 +130,8 @@ void gameplay__reset_state(Scene* scene)
     state->blip_pos_y = Y_GRIDS / 2;
 }
 
+char global_dynamic_score_text[DYNAMIC_SCORE_LENGTH] = ""; // Make sure the buffer is large enough
+
 Gameplay__Texts gameplay__setup_text()
 {
     SDL_Color white_text_color = {255, 255, 255, 255};  // White color
@@ -148,7 +150,7 @@ Gameplay__Texts gameplay__setup_text()
     }
     game_paused_drawn_text_static.font_size = font_size * 2.f;
     game_paused_drawn_text_static.color = white_text_color;
-    game_paused_drawn_text_static.text_rect.x = -LOGICAL_WIDTH; // Draw off-screen initially;
+    game_paused_drawn_text_static.text_rect.x = (real32)(-LOGICAL_WIDTH); // Draw off-screen initially;
 
 
     Drawn_Text_Static game_over_drawn_text_static = {};
@@ -157,7 +159,7 @@ Gameplay__Texts gameplay__setup_text()
     }
     game_over_drawn_text_static.font_size = font_size * 2.f;
     game_over_drawn_text_static.color = white_text_color;
-    game_over_drawn_text_static.text_rect.x = -LOGICAL_WIDTH; // Draw off-screen initially;
+    game_over_drawn_text_static.text_rect.x = (real32)(-LOGICAL_WIDTH); // Draw off-screen initially;
 
 
     Drawn_Text_Static restart_drawn_text_static = {};
@@ -166,13 +168,11 @@ Gameplay__Texts gameplay__setup_text()
     }
     restart_drawn_text_static.font_size = font_size;
     restart_drawn_text_static.color = white_text_color;
-    restart_drawn_text_static.text_rect.x = -LOGICAL_WIDTH; // Draw off-screen initially;
+    restart_drawn_text_static.text_rect.x = (real32)(-LOGICAL_WIDTH); // Draw off-screen initially;
 
-
-    char dynamic_score_text[DYNAMIC_SCORE_LENGTH]; // Make sure the buffer is large enough
     Drawn_Text_Int32 score_drawn_text_dynamic = {};
     score_drawn_text_dynamic.original_value = -1;
-    score_drawn_text_dynamic.text_string = dynamic_score_text;
+    score_drawn_text_dynamic.text_string = global_dynamic_score_text;
     score_drawn_text_dynamic.font_size = font_size;
     score_drawn_text_dynamic.color = white_text_color;
 
@@ -311,9 +311,9 @@ void gameplay__update(struct Scene* scene, real64 simulation_time_elapsed, real3
                     }
                 }
                 break;
-
-                    state->direction_locked = 1;
             }
+            
+            state->direction_locked = 1;
         }
 
         {  // Blip collision
@@ -345,7 +345,7 @@ void gameplay__update(struct Scene* scene, real64 simulation_time_elapsed, real3
                     state->blip_pos_y = random_y;
                 }
 
-                state->set_time_until_grid_jump__seconds -= 0.0005;
+                state->set_time_until_grid_jump__seconds -= 0.0005f;
             }
         }
 
@@ -405,7 +405,7 @@ void gameplay__update(struct Scene* scene, real64 simulation_time_elapsed, real3
         }
 
         {  // End Game if player crashes
-            for (int32 i = 0; i < state->next_snake_part_index; i++)
+            for (uint32 i = 0; i < state->next_snake_part_index; i++)
             {
                 Snake_Part* current_snake_part = &state->snake_parts[i];
                 if (state->pos_x == current_snake_part->pos_x && state->pos_y == current_snake_part->pos_y)
@@ -415,7 +415,8 @@ void gameplay__update(struct Scene* scene, real64 simulation_time_elapsed, real3
                 }
             }
 
-            if (state->pos_x < 0 || state->pos_x >= X_GRIDS || state->pos_y < 0 || state->pos_y >= Y_GRIDS)
+            if (state->pos_x < 0 || state->pos_x >= (int32)X_GRIDS || state->pos_y < 0 ||
+                state->pos_y >= (int32)Y_GRIDS)
             {
                 state->game_over = 1;
             }
@@ -521,7 +522,7 @@ void gameplay__render(Scene* scene)
 
     {  // Draw Blip
         Screen_Space_Position square_screen_pos =
-            map_world_space_position_to_screen_space_position(state->blip_pos_x, state->blip_pos_y);
+            map_world_space_position_to_screen_space_position((real32)state->blip_pos_x, (real32)state->blip_pos_y);
 
         real32 size = GRID_BLOCK_SIZE * 0.5f;
 
@@ -537,7 +538,7 @@ void gameplay__render(Scene* scene)
 
     {  // Draw Player
         Screen_Space_Position square_screen_pos =
-            map_world_space_position_to_screen_space_position(state->pos_x, state->pos_y);
+            map_world_space_position_to_screen_space_position((real32)state->pos_x, (real32)state->pos_y);
 
         SDL_FRect square = {};
         square.x = (real32)(square_screen_pos.x);
@@ -552,7 +553,7 @@ void gameplay__render(Scene* scene)
         {
             Snake_Part* snake_part = &state->snake_parts[i];
             Screen_Space_Position screen_pos =
-                map_world_space_position_to_screen_space_position(snake_part->pos_x, snake_part->pos_y);
+                map_world_space_position_to_screen_space_position((real32)snake_part->pos_x, (real32)snake_part->pos_y);
 
             SDL_FRect square = {};
             square.x = (real32)(screen_pos.x);
@@ -574,7 +575,7 @@ void gameplay__render(Scene* scene)
 
         // ==========================
 
-        if (state->next_snake_part_index != gameplay_texts->score_drawn_text_dynamic.original_value)
+        if ((int32)state->next_snake_part_index != gameplay_texts->score_drawn_text_dynamic.original_value)
         {
             snprintf(gameplay_texts->score_drawn_text_dynamic.text_string,
                      DYNAMIC_SCORE_LENGTH,
@@ -593,8 +594,8 @@ void gameplay__render(Scene* scene)
         if (state->game_over)
         {
             draw_text_static(&gameplay_texts->game_over_drawn_text_static);
-            gameplay_texts->game_over_drawn_text_static.text_rect.x = LOGICAL_WIDTH / 2;
-            gameplay_texts->game_over_drawn_text_static.text_rect.y = LOGICAL_HEIGHT / 2;
+            gameplay_texts->game_over_drawn_text_static.text_rect.x = (real32)(LOGICAL_WIDTH / 2);
+            gameplay_texts->game_over_drawn_text_static.text_rect.y = (real32)(LOGICAL_HEIGHT / 2);
 
             gameplay_texts->game_over_drawn_text_static.text_rect.x -=
                 gameplay_texts->game_over_drawn_text_static.text_rect.w / 2;
@@ -602,8 +603,8 @@ void gameplay__render(Scene* scene)
                 gameplay_texts->game_over_drawn_text_static.text_rect.h / 2;
 
             draw_text_static(&gameplay_texts->restart_drawn_text_static);
-            gameplay_texts->restart_drawn_text_static.text_rect.x = LOGICAL_WIDTH / 2;
-            gameplay_texts->restart_drawn_text_static.text_rect.y = LOGICAL_HEIGHT / 2;
+            gameplay_texts->restart_drawn_text_static.text_rect.x = (real32)(LOGICAL_WIDTH / 2);
+            gameplay_texts->restart_drawn_text_static.text_rect.y = (real32)(LOGICAL_HEIGHT / 2);
             gameplay_texts->restart_drawn_text_static.text_rect.x -=
                 gameplay_texts->restart_drawn_text_static.text_rect.w / 2;
             gameplay_texts->restart_drawn_text_static.text_rect.y -=
@@ -619,8 +620,8 @@ void gameplay__render(Scene* scene)
         if (state->is_paused)
         {
             draw_text_static(&gameplay_texts->game_paused_drawn_text_static);
-            gameplay_texts->game_paused_drawn_text_static.text_rect.x = LOGICAL_WIDTH / 2;
-            gameplay_texts->game_paused_drawn_text_static.text_rect.y = LOGICAL_HEIGHT / 2;
+            gameplay_texts->game_paused_drawn_text_static.text_rect.x = (real32)(LOGICAL_WIDTH / 2);
+            gameplay_texts->game_paused_drawn_text_static.text_rect.y = (real32)(LOGICAL_HEIGHT / 2);
 
             gameplay_texts->game_paused_drawn_text_static.text_rect.x -=
                 gameplay_texts->game_paused_drawn_text_static.text_rect.w / 2;

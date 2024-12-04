@@ -34,8 +34,9 @@ uint32 GRID_BLOCK_SIZE = 20;
 uint32 X_GRIDS = LOGICAL_WIDTH / GRID_BLOCK_SIZE;  // Should exactly divide into logical width
 uint32 Y_GRIDS = (int32)(X_GRIDS / ABSOLUTE_ASPECT_RATIO);
 
-int32 window_width = LOGICAL_WIDTH;
-int32 window_height = LOGICAL_HEIGHT;
+int32 global_window_width = LOGICAL_WIDTH;
+int32 global_window_height = LOGICAL_HEIGHT;
+int32 global_pixel_width, global_pixel_height;
 
 real32 SIMULATION_FPS = 100;
 real32 SIMULATION_DELTA_TIME_S = 1.f / SIMULATION_FPS;
@@ -70,15 +71,11 @@ struct Master_Timer
 
 void set_dpi()
 {
-    int32 window_width, window_height;
-    SDL_GetWindowSize(global_window, &window_width, &window_height);
-
-    int32 pixel_width, pixel_height;
-    SDL_GetWindowSizeInPixels(global_window, &pixel_width, &pixel_height);
-
-    real32 dpi = (real32)pixel_width / (real32)window_width;
-
-    global_text_dpi_scale_factor = dpi;
+    real32 dpi = (real32)global_pixel_width / (real32)global_window_width;
+    
+    // TODO: figure out how to always draw text crisply
+    // I'm hacking the 2.0f because the text looks blurry on my Windows machine. On Mac, it was working fine
+    global_text_dpi_scale_factor = dpi * 2.0f;
 }
 
 #ifdef __WIN32__
@@ -121,7 +118,8 @@ bool filterEvent(void* userdata, SDL_Event* event)
 
     if (event->type == SDL_EVENT_WINDOW_RESIZED)
     {
-        SDL_GetWindowSize(global_window, &window_width, &window_height);
+        SDL_GetWindowSize(global_window, &global_window_width, &global_window_height);
+        SDL_GetWindowSizeInPixels(global_window, &global_pixel_width, &global_pixel_height);
         set_dpi();
     }
 
@@ -187,6 +185,8 @@ int32 main(int32 argc, char* argv[])
     // SDL_SetHint(SDL_HINT_RENDER_DRIVER, "metal");
 #endif
 
+    SDL_GetWindowSize(global_window, &global_window_width, &global_window_height);
+    SDL_GetWindowSizeInPixels(global_window, &global_pixel_width, &global_pixel_height);
     set_dpi();
 
     SDL_Event event;
@@ -221,8 +221,8 @@ int32 main(int32 argc, char* argv[])
     SDL_Color white_text_color = { 255, 255, 255, 255 }; // White color
     real32 font_size = 16.0f;
 
-    real32 debug_x_start_offset = (int32)(LOGICAL_WIDTH * 0.01f);
-    real32 debug_y_start_offset = (int32)(LOGICAL_HEIGHT * 0.01f);
+    real32 debug_x_start_offset = LOGICAL_WIDTH * 0.01f;
+    real32 debug_y_start_offset = LOGICAL_HEIGHT * 0.01f;
     real32 debug_padding = 5.0f;
 
     // Get font height for offset
@@ -687,14 +687,14 @@ int32 main(int32 argc, char* argv[])
 
             if (elapsed_ticks < target_duration_ticks)
             {
-                Uint64 remaining_ticks = target_duration_ticks - elapsed_ticks;
-                real64 remaining_millis = 1000 * ((real64)remaining_ticks / master_timer.COUNTER_FREQUENCY);
+                real64 remaining_ticks = target_duration_ticks - (real64)elapsed_ticks;
+                real64 remaining_millis = 1000 * (remaining_ticks / master_timer.COUNTER_FREQUENCY);
 
                 if (remaining_millis > 2.f)
                 {
                     // Precision can be ~1ms on sleep these days. I'm minusing a ms because i want to spin wait
                     // for the remainder ms.
-                    SDL_Delay(remaining_millis - 1.0f);
+                    SDL_Delay((uint32)(remaining_millis - 1.0f));
                 }
 
                 // Spin-wait for the remaining time (microsecond precision)

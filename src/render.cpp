@@ -20,14 +20,14 @@ void draw_rect(SDL_FRect rect, SDL_Color color)
 // Define a struct to represent a key-value pair
 typedef struct
 {
-    int pt_size;
+    real32 pt_size;
     TTF_Font* font;
 } FontEntry;
 
 FontEntry global_font_cache[MAX_FONTS];
-int global_font_cache_size = 0;  // Number of entries in the cache
+uint32 global_font_cache_size = 0;  // Number of entries in the cache
 
-TTF_Font* get_font(int32 pt_size)
+TTF_Font* get_font(real32 pt_size)
 {
     // Search for the font in the cache
     for (uint32 i = 0; i < global_font_cache_size; ++i)
@@ -39,7 +39,7 @@ TTF_Font* get_font(int32 pt_size)
     }
 
     // Font not found in cache, so load it
-    TTF_Font* font = TTF_OpenFont("fonts/Share_Tech_Mono/ShareTechMono-Regular.ttf", pt_size);
+    TTF_Font* font = TTF_OpenFont("assets/fonts/Share_Tech_Mono/ShareTechMono-Regular.ttf", pt_size);
     if (!font)
     {
         fprintf(stderr, "Failed to load font: %s\n", SDL_GetError());
@@ -64,7 +64,7 @@ TTF_Font* get_font(int32 pt_size)
 // Cleanup function to free all fonts in the cache
 void cleanup_fonts()
 {
-    for (int i = 0; i < global_font_cache_size; ++i)
+    for (uint32 i = 0; i < global_font_cache_size; ++i)
     {
         TTF_CloseFont(global_font_cache[i].font);
     }
@@ -91,9 +91,9 @@ struct Drawn_Text_Int32
     SDL_Texture* cached_texture;
 };
 
-int32 get_font_pt_size(real32 font_size)
+real32 get_font_pt_size(real32 font_size)
 {
-    return (int32)(0.5f + font_size * global_text_dpi_scale_factor);
+    return 0.5f + font_size * global_text_dpi_scale_factor;
 }
 
 struct Drawn_Text_Static
@@ -110,7 +110,7 @@ void draw_text_static(Drawn_Text_Static* drawn_text)
     if (!drawn_text->cached_texture)
     {
         SDL_assert(drawn_text->font_size > 0);
-        int32 pt_size = get_font_pt_size(drawn_text->font_size);
+        real32 pt_size = get_font_pt_size(drawn_text->font_size);
         TTF_Font* font = get_font(pt_size);
         SDL_Surface* surface = TTF_RenderText_Blended(font, drawn_text->text_string, strlen(drawn_text->text_string), drawn_text->color);
         drawn_text->cached_texture = SDL_CreateTextureFromSurface(global_renderer, surface);
@@ -151,7 +151,7 @@ void draw_text_static_2(Drawn_Text_Static_2* drawn_text)
         }
 
         SDL_assert(drawn_text->font_size > 0);
-        int32 pt_size = get_font_pt_size(drawn_text->font_size);
+        real32 pt_size = get_font_pt_size(drawn_text->font_size);
         TTF_Font* font = get_font(pt_size);
         SDL_Surface* surface = TTF_RenderText_Blended(font, drawn_text->text_string, strlen(drawn_text->text_string), drawn_text->color);
         drawn_text->cached_texture = SDL_CreateTextureFromSurface(global_renderer, surface);
@@ -182,7 +182,7 @@ void draw_text_real32(Drawn_Text* drawn_text, real32 current_value)
         }
 
         SDL_assert(drawn_text->font_size > 0);
-        int32 pt_size = get_font_pt_size(drawn_text->font_size);
+        real32 pt_size = get_font_pt_size(drawn_text->font_size);
         TTF_Font* font = get_font(pt_size);
         SDL_Surface* surface = TTF_RenderText_Blended(font, drawn_text->text_string, strlen(drawn_text->text_string), drawn_text->color);
         drawn_text->cached_texture = SDL_CreateTextureFromSurface(global_renderer, surface);
@@ -213,7 +213,7 @@ void draw_text_int32(Drawn_Text_Int32* drawn_text, int32 current_value)
         }
 
         SDL_assert(drawn_text->font_size > 0);
-        int32 pt_size = get_font_pt_size(drawn_text->font_size);
+        real32 pt_size = get_font_pt_size(drawn_text->font_size);
         TTF_Font* font = get_font(pt_size);
         SDL_Surface* surface = TTF_RenderText_Blended(font, drawn_text->text_string, strlen(drawn_text->text_string), drawn_text->color);
         drawn_text->cached_texture = SDL_CreateTextureFromSurface(global_renderer, surface);

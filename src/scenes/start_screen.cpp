@@ -51,7 +51,7 @@ Menu_Texts start_screen__setup_text()
     }
     snake_game_text_static.font_size = font_size * 4.f;
     snake_game_text_static.color = white;
-    snake_game_text_static.text_rect.x = -LOGICAL_WIDTH;  // Draw off-screen initially;
+    snake_game_text_static.text_rect.x = (real32)(-LOGICAL_WIDTH);  // Draw off-screen initially;
 
     Drawn_Text_Static_2 start_game_text_static = {};
     {
@@ -59,7 +59,7 @@ Menu_Texts start_screen__setup_text()
     }
     start_game_text_static.font_size = font_size * 1.5f;
     start_game_text_static.color = white;
-    start_game_text_static.text_rect.x = -LOGICAL_WIDTH;  // Draw off-screen initially;
+    start_game_text_static.text_rect.x = (real32)(-LOGICAL_WIDTH);  // Draw off-screen initially;
 
     Drawn_Text_Static_2 exit_game_text_static = {};
     {
@@ -67,7 +67,7 @@ Menu_Texts start_screen__setup_text()
     }
     exit_game_text_static.font_size = font_size * 1.5f;
     exit_game_text_static.color = white;
-    exit_game_text_static.text_rect.x = -LOGICAL_WIDTH;  // Draw off-screen initially;
+    exit_game_text_static.text_rect.x = (real32)(-LOGICAL_WIDTH);  // Draw off-screen initially;
 
     Menu_Texts menu_texts = {};
     menu_texts.snake_game_text_static = snake_game_text_static;
@@ -210,7 +210,7 @@ void start_screen__render(Scene* scene)
 
     {  // Render Snake Game
         draw_text_static(&menu_texts->snake_game_text_static);
-        menu_texts->snake_game_text_static.text_rect.x = LOGICAL_WIDTH / 2;
+        menu_texts->snake_game_text_static.text_rect.x = (real32)(LOGICAL_WIDTH / 2);
         menu_texts->snake_game_text_static.text_rect.y = LOGICAL_HEIGHT * 0.25f;
 
         menu_texts->snake_game_text_static.text_rect.x -= menu_texts->snake_game_text_static.text_rect.w / 2;
